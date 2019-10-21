@@ -8,11 +8,11 @@ typealias Bytes20 = ByteArray
 
 // try using extension to put it on ByteArray
 fun byteArrayFomHexString(hexString: String): ByteArray {
-    val arrayOfBytes = hexString.subSequence(2, hexString.length-1).chunked(2).map { it.toByte(16) }
+    val arrayOfBytes = hexString.subSequence(2, hexString.length).chunked(2).map { it.toUByte(16).toByte() }
     return ByteArray(arrayOfBytes.size) { arrayOfBytes[it] }
 }
 
-fun ByteArray.toHexString() = asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
+fun ByteArray.toHexString() = "0x" + asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
 
 interface Serializable {
     fun toBinary(): ByteArray
@@ -27,22 +27,41 @@ interface Deserializable<T> {
 class ByteArrayReader(val byteArray: ByteArray) {
     var offset = 0
 
-    fun getBigInt(): BigInt = TODO()
-    fun getBytes20(): ByteArray = TODO()
-    fun getUShort(): UShort = TODO()
+    fun getBigInt(): BigInt  {
+        val bi = BigInt.fromBytesArray(byteArray.sliceArray(IntRange(offset, offset + 31)))
+        offset += 32
+        return bi
+    }
+    fun getBytes20(): ByteArray {
+        val b20 = byteArray.sliceArray(IntRange(offset, offset+19))
+        offset += 20
+        return b20;
+    }
+    fun getUShort(): UShort {
+        val int = (byteArray[offset].toUInt() shl 4) or byteArray[offset+1].toUInt()
+        offset += 2
+        return int.toUShort()
+    }
 }
 
 data class Output(val value: BigInt, val address: Bytes20, val color: UShort) : Serializable {
-    override fun toBinary(): ByteArray = value.toByteArray() + address + ByteArray(1) { color.toUInt().shr((1-it) * 4).toByte() }
+    override fun toBinary(): ByteArray = value.toByteArray() + ByteArray(2) { color.toUInt().shr((1-it) * 4).toByte() } + address
 
     override fun toHexString(): String = toBinary().toHexString()
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Output -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
 
     companion object : Deserializable<Output> {
         override fun fromBinary(binaryData: ByteArray): Output {
             val reader = ByteArrayReader(binaryData)
             val value = reader.getBigInt()
-            val address = reader.getBytes20()
             val color = reader.getUShort()
+            val address = reader.getBytes20()
             return Output(value, address, color)
         }
 
