@@ -20,6 +20,9 @@ class CommonTests {
         val expectedHexString = "0x000000000000000000000000000000000000000000000000000000000000000a0000b1ccdb544f603af631525ec406245909ad6e1b60"
         val actualHexString = output.toHexString()
 
+        println(expectedHexString)
+        println(actualHexString)
+
         assertTrue { actualHexString == expectedHexString }
     }
 }
