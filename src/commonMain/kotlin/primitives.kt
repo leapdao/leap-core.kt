@@ -6,7 +6,6 @@ typealias Bytes20 = ByteArray
 //typealias Bytes2 = UShort
 //typealias Bytes4 = UInt
 
-// try using extension to put it on ByteArray
 fun byteArrayFomHexString(hexString: String): ByteArray {
     val arrayOfBytes = hexString.subSequence(2, hexString.length).chunked(2).map { it.toUByte(16).toByte() }
     return ByteArray(arrayOfBytes.size) { arrayOfBytes[it] }

@@ -58,6 +58,7 @@ kotlin {
         jsTest {
             dependencies {
                 implementation kotlin('test-js')
+                implementation(npm("leap-core", "0.36.1"))
             }
         }
     }
