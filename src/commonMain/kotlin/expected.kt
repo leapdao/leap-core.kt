@@ -5,7 +5,8 @@ expect class BigInt {
 
     companion object {
         fun fromBytesArray(binaryData: ByteArray): BigInt
-        fun fromString(data: String): BigInt
+        fun fromString(string: String): BigInt
+//        fun fromInt(num: Int): BigInt
     }
 }
 

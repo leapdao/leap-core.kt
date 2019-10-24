@@ -22,7 +22,7 @@ actual class BigInt(val bi: JSBigInt) {
 
     actual companion object {
         actual fun fromBytesArray(binaryData: ByteArray): BigInt = BigInt(JSBI.BigInt(binaryData.toHexString()))
-        actual fun fromString(data: String): BigInt = BigInt(JSBI.BigInt(data))
+        actual fun fromString(string: String): BigInt = BigInt(JSBI.BigInt(string))
     }
 }
 

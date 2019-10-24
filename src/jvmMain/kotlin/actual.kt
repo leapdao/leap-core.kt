@@ -11,7 +11,7 @@ actual class BigInt(val bi: BigInteger) {
 
     actual companion object {
         actual fun fromBytesArray(binaryData: ByteArray): BigInt = BigInt(BigInteger(binaryData))
-        actual fun fromString(data: String): BigInt = BigInt(BigInteger(data))
+        actual fun fromString(string: String): BigInt = BigInt(BigInteger(string))
     }
 }
 

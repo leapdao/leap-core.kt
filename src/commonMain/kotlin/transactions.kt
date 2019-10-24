@@ -9,35 +9,19 @@ data class Transfer(val inputs: List<Input>, val outputs: List<Output>) : Transa
     override val type =
         3u.toUByte(); // will be ignored by data class methods, problem? Maybe on copy type wont get copied?
 
-    override fun toBinary(): ByteArray = TODO()
-
-    override fun toHexString(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun toByteArray(): ByteArray = TODO()
 
     companion object : Deserializable<Transfer> {
-        override fun fromBinary(binaryData: ByteArray): Transfer = TODO()
-
-        override fun fromHexString(string: String): Transfer {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override val decoder: State<Transfer, ByteArrayBuffer> = TODO()
     }
 }
 
 data class Deposit(val depositId: UInt) : Transaction() {
     override val type = 2u.toUByte();
-    override fun toBinary(): ByteArray = TODO()
-
-    override fun toHexString(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun toByteArray(): ByteArray = TODO()
 
     companion object : Deserializable<Deposit> {
-        override fun fromBinary(binaryData: ByteArray): Deposit = TODO()
-
-        override fun fromHexString(string: String): Deposit {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override val decoder: State<Deposit, ByteArrayBuffer> = TODO()
     }
 }
 
