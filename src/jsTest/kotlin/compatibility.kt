@@ -25,9 +25,9 @@ class CompatibilityTests {
         val color = 0
 
         val originalOutput = LeapCore.Output(value, address, color)
-        val newOutput = Output(BigInt.fromString(value.toString()), byteArrayFomHexString(address), color.toUShort())
+        val newOutput = Output(value, address, color)
 
-        assertTrue { newOutput.toHexString() == "0x" + originalOutput.toRaw().toString("hex") }
+        assertTrue { newOutput.toHexString() == originalOutput.toRaw().toString("hex") }
     }
 
 }

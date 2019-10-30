@@ -1,11 +1,14 @@
-package leapcore
+package leapcore.lib.merkle
+
+import leapcore.lib.crypto.hash
+
 
 sealed class MerkleTree {
-    abstract val hash: Bytes32;
+    abstract val hash: ByteArray;
 }
 
-data class Leaf(override val hash: Bytes32): MerkleTree()
-data class Node(override val hash: Bytes32, val left: MerkleTree, val right: MerkleTree): MerkleTree()
+data class Leaf(override val hash: ByteArray): MerkleTree()
+data class Node(override val hash: ByteArray, val left: MerkleTree, val right: MerkleTree): MerkleTree()
 
 fun foldTree(level: List<MerkleTree>): MerkleTree =
     when (level.size) {
