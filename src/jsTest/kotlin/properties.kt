@@ -9,16 +9,26 @@ fun <T> testProperty(gen: () -> T, property: (T) -> Boolean): Unit {
     }
 }
 
-val outputPathIsIdentity: (Output) -> Boolean = {output ->
+val outputRoundaboutIsIdentity: (Output) -> Boolean = { output ->
     Output.fromHexString(output.toHexString()) == output
 }
-
-val compareOutputSerialization: (Output) -> Boolean = {output ->
+val outputSerializesIdentically: (Output) -> Boolean = { output ->
     output.toHexString() == marshallOutput(output).toRaw().toString("hex")
 }
-
-val compareOutputParsing: (hexString: String) -> Boolean = {hexString ->
+val outputDeserializesIdentically: (String) -> Boolean = { hexString ->
     val original = LeapCore.Output.fromRaw(Buffer.from(hexString, "hex"))
     val new = Output.fromHexString(hexString)
     new == unmarshallOutput(original)
+}
+
+val outputWithDataRoundaboutIsIdentity: (OutputWithData) -> Boolean = { outputWithData ->
+    OutputWithData.fromHexString(outputWithData.toHexString()) == outputWithData
+}
+val outputWithDataSerializesIdentiaclly: (OutputWithData) -> Boolean = { outputWithData ->
+    outputWithData.toHexString() == marshallOutputWithData(outputWithData).toRaw().toString("hex")
+}
+val outputWithDataDesrializesIdentically: (String) -> Boolean = { hexString ->
+    val original = LeapCore.Output.fromRaw(Buffer.from(hexString, "hex"))
+    val new = OutputWithData.fromHexString(hexString)
+    new == unmarshallOutputWithData(original)
 }

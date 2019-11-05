@@ -7,9 +7,16 @@ class CompatibilityTests {
 
     @Test
     fun output() {
-        testProperty(genOutput, outputPathIsIdentity)
-        testProperty(genOutput, compareOutputSerialization)
-        testProperty(genRawOutput, compareOutputParsing)
+        testProperty(genOutput, outputRoundaboutIsIdentity)
+        testProperty(genOutput, outputSerializesIdentically)
+        testProperty(genRawOutput, outputDeserializesIdentically)
+    }
+
+    @Test
+    fun outputWithData() {
+        testProperty(genOutputWithData, outputWithDataRoundaboutIsIdentity)
+        testProperty(genOutputWithData, outputWithDataSerializesIdentiaclly)
+        testProperty(genRawOutputWithData, outputWithDataDesrializesIdentically)
     }
 
 }

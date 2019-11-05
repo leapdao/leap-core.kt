@@ -36,6 +36,13 @@ data class Output(val value: BigInt, val address: Bytes20, val color: UShort) : 
 data class OutputWithData(val output: Output, val data: Bytes32) : Serializable {
     override fun toByteArray(): ByteArray = output.toByteArray() + data
 
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is OutputWithData -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
+
     companion object : Decoder<OutputWithData> by
             Output     bind {output ->
             GetBytes32 bind {data ->
