@@ -12,6 +12,8 @@ val GetBytes32 = getSlice(32)
 val GetBigInt = GetBytes32.map { bytes32 -> BigInt.fromByteArray(bytes32) }
 
 // TODO find nice way do deal with equality
+// TODO input validation
+// TODO output colors - ERC, NFT, NST - seperate types?
 
 data class Output(val value: BigInt, val address: Bytes20, val color: UShort) : Serializable {
     override fun toByteArray(): ByteArray = value.toByteArray() + color.toByteArray() + address
@@ -58,6 +60,20 @@ data class Signature(val r: ByteArray, val s: ByteArray, val v: UByte) : Seriali
     override fun toByteArray(): ByteArray = r + s + v.toByteArray()
 
     companion object : Decoder<Signature> by
+            TODO()
+}
+
+data class SignedInput(val input: Input, val signature: Signature): Serializable {
+    override fun toByteArray(): ByteArray = TODO()
+
+    companion object : Decoder<SignedInput> by
+            TODO()
+}
+
+data class UnsignedTransfer(val inputs: List<Input>, val outputs: List<Output>) : Serializable {
+    override fun toByteArray(): ByteArray = TODO()
+
+    companion object : Decoder<UnsignedTransfer> by
             TODO()
 }
 

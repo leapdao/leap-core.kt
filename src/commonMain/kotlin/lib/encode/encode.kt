@@ -7,5 +7,5 @@ interface Serializable {
 
 fun ByteArray.toHexString() = asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
 
-fun UShort.toByteArray() = ByteArray(2) { this.toUInt().shr((1-it) * 4).toByte() }
+fun UShort.toByteArray() = ByteArray(2) { this.toUInt().shr((1-it) * 8).toByte() }
 fun UByte.toByteArray() = ByteArray(1) { this.toByte() }

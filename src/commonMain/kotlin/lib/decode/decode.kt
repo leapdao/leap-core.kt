@@ -30,7 +30,7 @@ val GetUByte = object : Decoder<UByte> {
 val GetUShort: Decoder<UShort> =
     GetUByte bind { byte1 ->
     GetUByte bind { byte2 ->
-        val short = (byte2.toUInt() shl 8) or byte1.toUInt()
+        val short = (byte1.toUInt() shl 8) or byte2.toUInt()
         retun<UShort>(short.toUShort())
     } }
 
