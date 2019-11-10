@@ -53,6 +53,7 @@ kotlin {
             dependencies {
                 implementation kotlin('stdlib-js')
                 implementation(npm("jsbi", "3.1.1"))
+                implementation(npm("ethereumjs-util", "6.0.0"))
             }
         }
         jsTest {

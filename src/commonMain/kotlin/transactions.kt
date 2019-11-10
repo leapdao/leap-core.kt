@@ -7,14 +7,9 @@ sealed class Transaction : Serializable {
     abstract val type: UByte
 }
 
-fun lengthsHash(inLength: UByte, outLength: UByte): UByte {
-    return (16u.toUByte() * inLength + outLength).toUByte()
-}
-
-
 data class Transfer(val inputs: List<SignedInput>, val outputs: List<Output>) : Transaction() {
     override val type = 3.toUByte(); // will be ignored by data class methods, problem? Maybe on copy type wont get copied?
-    override fun toByteArray(): ByteArray = TODO()
+    override fun toByteArray(): ByteArray = type.toByteArray() + inputs.toByteArray() + outputs.toByteArray()
 
     companion object : Decoder<Transfer> by
             TODO()

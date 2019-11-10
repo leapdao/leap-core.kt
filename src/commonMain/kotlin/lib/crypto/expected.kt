@@ -1,10 +1,6 @@
 package leapcore.lib.crypto
 
-interface Signature {
-    val r: ByteArray
-    val s: ByteArray
-    val v: UByte
-}
+data class Signature(val r: ByteArray, val s: ByteArray, val v: Byte)
 
 expect fun hash(data: ByteArray): ByteArray
-expect fun sign(data: ByteArray): Signature
+expect fun sign(data: ByteArray, privateKey: ByteArray): Signature

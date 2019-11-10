@@ -19,4 +19,27 @@ class CompatibilityTests {
         testProperty(genRawOutputWithData, outputWithDataDesrializesIdentically)
     }
 
+    @Test
+    fun input() {
+        testProperty(genInput, inputRoundaboutIsIdentity)
+        testProperty(genInput, inputSerializesIdentically)
+        testProperty(genRawInput, inputDeserializesIdentically)
+        testProperty(genInput, utxoIdIsIdentiacal)
+    }
+
+    @Test
+    fun signedInput() {
+        testProperty(genSignedInput, signedInputRoundaboutIsIdentity)
+        testProperty(genSignedInput, signedInputSerializesIdentiaclly)
+        testProperty(genRawSignedInput, signedInputDeserializesIdentically)
+    }
+
+    @Test
+    fun unsignedTransfer() {
+        testProperty(genUnsignedTransfer, unsignedTransferRoundaboutIsIdentity)
+        testProperty(genUnsignedTransfer, unsignedTransferSerializesIdentiaclly)
+//        Not DOABLE
+//        testProperty(genRawUnsignedTransfer, unsignedTransferDeserializesIdentiaclly)
+    }
+
 }
