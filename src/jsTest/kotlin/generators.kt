@@ -4,9 +4,6 @@ import leapcore.lib.bigint.BigInt
 import leapcore.lib.crypto.sign
 import leapcore.lib.decode.byteArrayFromHexString
 
-
-// TODO: Monadize this
-
 val exampleAddress = "0x11CE694469797ee31BB755af6f7064312571740E"
 val examplePrivateKey = "820a14201caaf3be42bb0976a80ab5c6aee692c71eb8f0b1cb6bf678cef295de"
 
@@ -53,4 +50,28 @@ val genUnsignedTransfer = {
     UnsignedTransfer(inputs, outputs)
 }
 val genRawUnsignedTransfer = { genUnsignedTransfer().toHexString() }
+val genTransfer = {
+    val inputs = genList(genLength(), genValidSignedInput)
+    val outputs = genList(genLength(), genOutput)
+    Transfer(inputs, outputs)
+}
+val genRawTransfer = { genTransfer().toHexString() }
+val genMsgDataLength = { (1 .. 20).random() }
+val genScriptLength = { (5 .. 100).random() }
+val genArrayOfLength = { len: Int -> getByteArrayGen(len)() }
+val genSpendingConditionInput = {
+    val input = genInput()
+    val msgData = genArrayOfLength(genMsgDataLength())
+    val script = genArrayOfLength(genScriptLength())
+    SpendingConditionInput(input, msgData, script)
+}
+val genRawSpendingConditionInput = { genSpendingConditionInput().toHexString() }
+val genLengthSpendingCondition = { (1 .. 14).random() }
+val genSpendingCondition = {
+    val specialInput = genSpendingConditionInput()
+    val inputs = genList(genLengthSpendingCondition(), genValidSignedInput)
+    val outputs = genList(genLength(), genOutput)
+    SpendingCondition(specialInput, inputs, outputs)
+}
+val genRawSpendingCondition = { genSpendingCondition().toHexString() }
 

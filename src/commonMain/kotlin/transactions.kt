@@ -3,17 +3,19 @@ package leapcore
 import leapcore.lib.encode.*
 import leapcore.lib.decode.*
 
-sealed class Transaction : Serializable {
-//    companion object : Decoder<Transaction> by
-//            GetUByte bind {type ->
-//            when(type) {
-//                Transfer.type -> Transfer
-//                else -> Transfer
-//            } }
-}
+sealed class Transaction : Serializable {}
 
 data class Transfer(val inputs: List<SignedInput>, val outputs: List<Output>) : Transaction() {
-    override fun toByteArray(): ByteArray = type.toByteArray() + inputs.toByteArray() + outputs.toByteArray()
+    override fun toByteArray(): ByteArray =
+                type.toByteArray() +  lengthsHash(inputs.size.toUByte(), outputs.size.toUByte()).toByteArray() +
+                inputs.toByteArray() + outputs.toByteArray()
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Transfer -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
 
     companion object : Decoder<Transfer> by
             GetUByte.map(::parseLengths) bind { pair ->
@@ -28,11 +30,27 @@ data class Transfer(val inputs: List<SignedInput>, val outputs: List<Output>) : 
     }
 }
 
-data class SpendingCondition(val inputs: List<SignedInput>, val outputs: List<Output>): Transaction() {
-    override fun toByteArray(): ByteArray = TODO()
+data class SpendingCondition(val specialInput: SpendingConditionInput, val inputs: List<SignedInput>, val outputs: List<Output>): Transaction() {
+    override fun toByteArray(): ByteArray =
+        Companion.type.toByteArray() + lengthsHash((inputs.size + 1).toUByte(), outputs.size.toUByte()).toByteArray() +
+        specialInput.toByteArray() + inputs.toByteArray() + outputs.toByteArray()
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is SpendingCondition -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
 
     companion object : Decoder<SpendingCondition> by
-            TODO()
+            GetUByte.map(::parseLengths) bind { pair ->
+            val ins = pair.first - 1
+            val outs = pair.second
+            SpendingConditionInput       bind { specialInput ->
+            mul(SignedInput, ins)        bind { inputs ->
+            mul(Output, outs)            bind { outputs ->
+                pure(SpendingCondition(specialInput, inputs, outputs))
+            } } } }
     {
         val type: UByte = 13.toUByte()
     }

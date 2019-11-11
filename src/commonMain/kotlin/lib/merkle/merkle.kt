@@ -10,7 +10,7 @@ sealed class MerkleTree {
 data class Leaf(override val hash: ByteArray): MerkleTree()
 data class Node(override val hash: ByteArray, val left: MerkleTree, val right: MerkleTree): MerkleTree()
 
-fun foldTree(level: List<MerkleTree>): MerkleTree =
+tailrec fun foldTree(level: List<MerkleTree>): MerkleTree =
     when (level.size) {
         1 -> level[0]
         else -> foldTree(level.chunked(2).map {(left, right) ->

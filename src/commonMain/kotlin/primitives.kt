@@ -21,10 +21,6 @@ fun parseLengths(lengthsHash: UByte): Pair<Int, Int> {
     return Pair(inputsLength, outputsLength)
 }
 
-// TODO find nice way do deal with equality
-// TODO input validation
-// TODO output colors - ERC, NFT, NST - seperate types?
-
 data class Output(val value: BigInt, val address: Bytes20, val color: UShort) : Serializable {
     override fun toByteArray(): ByteArray = value.toByteArray() + color.toByteArray() + address
 
@@ -120,6 +116,28 @@ data class SignedInput(val input: Input, val signature: Signature): Serializable
             Signature bind  {sig ->
                 pure(SignedInput(input, sig))
             } }
+}
+
+data class SpendingConditionInput(val input: Input, val msgData: ByteArray, val script: ByteArray): Serializable {
+    override fun toByteArray(): ByteArray =
+        input.toByteArray() + msgData.size.toUShort().toByteArray() + msgData +
+        script.size.toUShort().toByteArray() + script
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is SpendingConditionInput -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
+
+    companion object : Decoder<SpendingConditionInput> by
+            Input                           bind {input ->
+            GetUShort                       bind {msgDataLength ->
+            getSlice(msgDataLength.toInt()) bind {msgData ->
+            GetUShort                       bind {scriptLength ->
+            getSlice(scriptLength.toInt())  bind {script ->
+                pure(SpendingConditionInput(input, msgData, script))
+            } } } } }
 }
 
 data class UnsignedTransfer(val inputs: List<Input>, val outputs: List<Output>) : Serializable {

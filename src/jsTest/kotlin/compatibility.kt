@@ -38,8 +38,40 @@ class CompatibilityTests {
     fun unsignedTransfer() {
         testProperty(genUnsignedTransfer, unsignedTransferRoundaboutIsIdentity)
         testProperty(genUnsignedTransfer, unsignedTransferSerializesIdentiaclly)
-//        Not DOABLE
-//        testProperty(genRawUnsignedTransfer, unsignedTransferDeserializesIdentiaclly)
     }
+
+    @Test
+    fun spendingConditionInput() {
+        testProperty(genSpendingConditionInput, spendingConditionInputRoundaboutIsIdentity)
+        testProperty(genSpendingConditionInput, spendingConditionInputSerializesIdentically)
+        testProperty(genRawSpendingConditionInput, spendingConditionInputDeserialzesIdentically)
+    }
+
+    @Test
+    fun transferRoundabout() {
+        testProperty(genTransfer, transferRoundaboutIsIdentity)
+    }
+    @Test
+    fun transferSerialization() {
+        testProperty(genTransfer, transferSerializesIdentically)
+    }
+    @Test
+    fun transferDeserialization() {
+        testPropertyShort(genRawTransfer, transferDeserializesIdentiacally)
+    }
+
+    @Test
+    fun spendingConditionRoundabout() {
+        testProperty(genSpendingCondition, spendingConditionRoundaboutIsIdentity)
+    }
+    @Test
+    fun spendingConditionSerialization() {
+        testProperty(genSpendingCondition, spendingConditionSerializesIdentically)
+    }
+    @Test
+    fun spendingConditionDeserialization() {
+        testPropertyShort(genRawSpendingCondition, spendingConditionDeserializesIdentically)
+    }
+
 
 }

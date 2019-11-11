@@ -1,6 +1,8 @@
 package leapcore
 
 import leapcore.lib.bigint.JSBigInt
+import leapcore.lib.decode.byteArrayFromHexString
+import leapcore.lib.encode.toHexString
 
 external class Buffer {
     fun toString(encoding: String): String
@@ -9,6 +11,8 @@ external class Buffer {
         fun from(string: String, encoding: String): Buffer
     }
 }
+fun ByteArray.toBuffer(): Buffer = Buffer.from(this.toHexString(), "hex")
+fun Buffer.toByteArray(): ByteArray = byteArrayFromHexString(this.toString("hex"))
 
 @JsModule("leap-core")
 @JsNonModule
@@ -39,17 +43,27 @@ external class LeapCore {
         }
     }
 
+    interface SpendingConditionInputOptions {
+        var script: Buffer
+        var msgData: Buffer
+        var prevout: Outpoint
+    }
+
     class Input {
         constructor(outpoint: Outpoint)
+        constructor(options: SpendingConditionInputOptions)
         fun toRaw(): Buffer
         fun setSig(r: Buffer, s: Buffer, v: Number, signer: String): Unit
         var r: Buffer
         var s: Buffer
         var v : Number
         var prevout: Outpoint
+        var msgData: Buffer
+        var script: Buffer
 
         companion object {
             fun fromRaw(buf: Buffer, offset: Int, sigHashBuff: Buffer): Input
+            fun fromRaw(buf: Buffer, offset: Int, type: Int): Input
         }
     }
 
@@ -64,7 +78,20 @@ external class LeapCore {
         companion object {
             fun fromRaw(buf: Buffer): Tx
             fun transfer(inputs: Array<Input>, outputs: Array<Output>): Tx
+            fun spendCond(inputs: Array<Input>, outputs: Array<Output>): Tx
         }
     }
-
 }
+
+fun LeapCore.Output.toHexString() = this.toRaw().toString("hex")
+fun LeapCore.Output.Companion.fromHexString(hexString: String) = this.fromRaw(Buffer.from(hexString, "hex"))
+
+fun LeapCore.Outpoint.toHexString() = this.toRaw().toString("hex")
+fun LeapCore.Outpoint.Companion.fromHexString(hexString: String) = this.fromRaw(Buffer.from(hexString, "hex"))
+
+fun LeapCore.Input.toHexString() = this.toRaw().toString("hex")
+fun LeapCore.Input.Companion.fromHexString(hexString: String, msgHash: ByteArray) = this.fromRaw(Buffer.from(hexString, "hex"), 0, msgHash.toBuffer())
+fun LeapCore.Input.Companion.fromHexString(hexString: String) = this.fromRaw(Buffer.from(hexString, "hex"), 0, 13)
+
+fun LeapCore.Tx.toHexString() = this.toRaw().toString("hex")
+fun LeapCore.Tx.Companion.fromHexString(hexString: String) = this.fromRaw(Buffer.from(hexString, "hex"))

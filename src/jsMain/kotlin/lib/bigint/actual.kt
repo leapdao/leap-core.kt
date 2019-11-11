@@ -10,7 +10,6 @@ external class JSBigInt {
 @JsModule("jsbi")
 @JsNonModule
 external class JSBI {
-
     companion object {
         fun BigInt(string: String): JSBigInt
         fun BigInt(int: Int): JSBigInt
