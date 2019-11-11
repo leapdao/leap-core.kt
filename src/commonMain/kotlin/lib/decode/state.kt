@@ -1,7 +1,7 @@
 package leapcore.lib.decode
 
 // Generic state type
-interface State<A, S> {
+interface State<out A, S> {
     val runState: (s: S) -> Pair<A, S>
 }
 
