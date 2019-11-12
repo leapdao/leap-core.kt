@@ -1,0 +1,4 @@
+rootProject.name = 'leapcore'
+
+
+enableFeaturePreview('GRADLE_METADATA')
