@@ -73,5 +73,11 @@ class CompatibilityTests {
         testPropertyShort(genRawSpendingCondition, spendingConditionDeserializesIdentically)
     }
 
+    @Test
+    fun deposit() {
+        testProperty(genDeposit, depositRoundaboutIsIdentity)
+        testProperty(genDeposit, depositSerializesIdentically)
+    }
+
 
 }

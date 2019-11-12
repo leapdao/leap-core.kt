@@ -79,6 +79,7 @@ external class LeapCore {
             fun fromRaw(buf: Buffer): Tx
             fun transfer(inputs: Array<Input>, outputs: Array<Output>): Tx
             fun spendCond(inputs: Array<Input>, outputs: Array<Output>): Tx
+            fun deposit(depositId: Long, value: JSBigInt, address: String, color: Number): Tx
         }
     }
 }

@@ -107,3 +107,9 @@ fun unmarshallSpendingConidtion(tx: LeapCore.Tx): SpendingCondition {
     return SpendingCondition(specialInput, inputs, outputs)
 }
 
+fun marshallDeposit(deposit: Deposit): LeapCore.Tx {
+    val (depositId, output) = deposit
+    val leapOutput = marshallOutput(output)
+    return LeapCore.Tx.deposit(depositId.toLong(), leapOutput.value, leapOutput.address, leapOutput.color)
+}
+

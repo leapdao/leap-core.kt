@@ -10,6 +10,7 @@ val examplePrivateKey = "820a14201caaf3be42bb0976a80ab5c6aee692c71eb8f0b1cb6bf67
 val genUByte = { (0 .. 255).random().toUByte() }
 val genByte = { (-128 .. 127).random().toByte() }
 val genUShort = { (0 .. 65535).random().toUShort() }
+val genUInt = { (0u .. UInt.MAX_VALUE).random() }
 fun getByteArrayGen(n: Int): () -> ByteArray = { ByteArray(n){ genUByte().toByte() } }
 val genBytes32 = getByteArrayGen(32)
 val genBytes20 = getByteArrayGen(20)
@@ -74,4 +75,5 @@ val genSpendingCondition = {
     SpendingCondition(specialInput, inputs, outputs)
 }
 val genRawSpendingCondition = { genSpendingCondition().toHexString() }
+val genDeposit = { Deposit(genUInt(), genOutput()) }
 

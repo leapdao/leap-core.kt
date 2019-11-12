@@ -127,3 +127,10 @@ val spendingConditionDeserializesIdentically: (String) -> Boolean = {hexString -
     new == unmarshallSpendingConidtion(original)
 }
 
+// Deposit
+val depositRoundaboutIsIdentity: (Deposit) -> Boolean = {deposit ->
+    eatType(Deposit).fromHexString(deposit.toHexString()) == deposit
+}
+val depositSerializesIdentically: (Deposit) -> Boolean = {deposit ->
+    deposit.toHexString() == marshallDeposit(deposit).toHexString()
+}

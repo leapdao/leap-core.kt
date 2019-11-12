@@ -47,6 +47,6 @@ val GetUShort: Decoder<UShort> =
 val GetUInt: Decoder<UInt> =
     GetUShort bind { short1 ->
     GetUShort bind { short2 ->
-        val int = (short2.toUInt() shl 16) or short1.toUInt()
+        val int = (short1.toUInt() shl 16) or short2.toUInt()
         pure(int)
     } }
