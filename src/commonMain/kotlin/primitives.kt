@@ -1,123 +1,172 @@
 package leapcore
 
-typealias Bytes32 = ByteArray
+import leapcore.lib.bigint.BigInt
+import leapcore.lib.decode.*
+import leapcore.lib.encode.*
+
 typealias Bytes20 = ByteArray
-//typealias Bytes1 = UByte
-//typealias Bytes2 = UShort
-//typealias Bytes4 = UInt
+typealias Bytes32 = ByteArray
 
-fun byteArrayFomHexString(hexString: String): ByteArray {
-    val arrayOfBytes = hexString.subSequence(2, hexString.length).chunked(2).map { it.toUByte(16).toByte() }
-    return ByteArray(arrayOfBytes.size) { arrayOfBytes[it] }
+val GetBytes20 = getSlice(20)
+val GetBytes32 = getSlice(32)
+val GetBigInt = GetBytes32.map { bytes32 -> BigInt.fromByteArray(bytes32) }
+
+fun lengthsHash(inLength: UByte, outLength: UByte): UByte {
+    return (16u.toUByte() * inLength + outLength).toUByte()
 }
 
-fun ByteArray.toHexString() = "0x" + asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
-
-interface Serializable {
-    fun toBinary(): ByteArray
-    fun toHexString(): String
-}
-
-interface Deserializable<T> {
-    fun fromBinary(binaryData: ByteArray): T
-    fun fromHexString(string: String): T
-}
-
-class ByteArrayReader(val byteArray: ByteArray) {
-    var offset = 0
-
-    fun getBigInt(): BigInt  {
-        val bi = BigInt.fromBytesArray(byteArray.sliceArray(IntRange(offset, offset + 31)))
-        offset += 32
-        return bi
-    }
-    fun getBytes20(): ByteArray {
-        val b20 = byteArray.sliceArray(IntRange(offset, offset+19))
-        offset += 20
-        return b20;
-    }
-    fun getUShort(): UShort {
-        val int = (byteArray[offset].toUInt() shl 4) or byteArray[offset+1].toUInt()
-        offset += 2
-        return int.toUShort()
-    }
+fun parseLengths(lengthsHash: UByte): Pair<Int, Int> {
+    val inputsLength = lengthsHash.toUInt().shr(4).toInt()
+    val outputsLength = ( lengthsHash and 0x0fu ).toInt()
+    return Pair(inputsLength, outputsLength)
 }
 
 data class Output(val value: BigInt, val address: Bytes20, val color: UShort) : Serializable {
-    override fun toBinary(): ByteArray = value.toByteArray() + ByteArray(2) { color.toUInt().shr((1-it) * 4).toByte() } + address
-
-    override fun toHexString(): String = toBinary().toHexString()
+    override fun toByteArray(): ByteArray = value.toByteArray() + color.toByteArray() + address
 
     override fun equals(other: Any?): Boolean {
         return when (other) {
             is Output -> other.toHexString() == this.toHexString()
+            else  -> super.equals(other)
+        }
+    }
+
+    companion object : Decoder<Output> by
+            GetBigInt  bind {value ->
+            GetUShort  bind {color ->
+            GetBytes20 bind {address ->
+                pure(Output(value, address, color))
+            } } }
+}
+
+data class OutputWithData(val output: Output, val data: Bytes32) : Serializable {
+    override fun toByteArray(): ByteArray = output.toByteArray() + data
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is OutputWithData -> other.toHexString() == this.toHexString()
             else -> super.equals(other)
         }
     }
 
-    companion object : Deserializable<Output> {
-        override fun fromBinary(binaryData: ByteArray): Output {
-            val reader = ByteArrayReader(binaryData)
-            val value = reader.getBigInt()
-            val color = reader.getUShort()
-            val address = reader.getBytes20()
-            return Output(value, address, color)
-        }
-
-        override fun fromHexString(string: String): Output = fromBinary(byteArrayFomHexString(string))
-    }
-}
-
-data class OutputWithData(val output: Output, val data: Bytes32) : Serializable {
-    override fun toBinary(): ByteArray = TODO()
-
-    override fun toHexString(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    companion object : Deserializable<OutputWithData> {
-        override fun fromBinary(binaryData: ByteArray): OutputWithData = TODO()
-
-        override fun fromHexString(string: String): OutputWithData {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    }
+    companion object : Decoder<OutputWithData> by
+            Output     bind {output ->
+            GetBytes32 bind {data ->
+                pure(OutputWithData(output, data))
+            }}
 }
 
 data class Input(val txHash: Bytes32, val id: UByte) : Serializable {
 
-    fun utxoId(): Bytes32 = TODO() //16 zeros, 4 bit id, 12 bit end of txHash
-
-    override fun toBinary(): ByteArray = TODO()
-
-    override fun toHexString(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun utxoId(): Bytes32 {
+        val padding = ByteArray(16){0.toByte()}
+        val end = txHash.slice(IntRange(17, 31))
+        return padding + id.toByte() + end
     }
 
-    companion object : Deserializable<Input> {
-        override fun fromBinary(binaryData: ByteArray): Input = TODO()
+    override fun toByteArray(): ByteArray = txHash + id.toByteArray()
 
-        override fun fromHexString(string: String): Input {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Input -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
         }
+    }
+
+    companion object : Decoder<Input> by
+            GetBytes32 bind {txHash ->
+            GetUByte   bind {id ->
+                pure(Input(txHash, id))
+            } }
+}
+
+data class Signature(val r: Bytes32, val s: Bytes32, val v: Byte) : Serializable {
+    override fun toByteArray(): ByteArray = r + s + v.toByteArray()
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Signature -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
+
+    companion object : Decoder<Signature> by
+            GetBytes32 bind {r ->
+            GetBytes32 bind {s ->
+            GetByte bind  {v ->
+                pure(Signature(r, s, v))
+            } } }
+    {
+        val EMPTY: Signature = Signature(ByteArray(32), ByteArray(32), 0)
     }
 }
 
-data class Signature(val r: ByteArray, val s: ByteArray, val v: Byte) : Serializable {
-    override fun toBinary(): ByteArray = TODO()
+data class SignedInput(val input: Input, val signature: Signature): Serializable {
+    override fun toByteArray(): ByteArray = input.toByteArray() + signature.toByteArray()
 
-    override fun toHexString(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    companion object : Deserializable<Signature> {
-        override fun fromBinary(binaryData: ByteArray): Signature = TODO()
-
-        override fun fromHexString(string: String): Signature {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is SignedInput -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
         }
     }
+
+    companion object : Decoder<SignedInput> by
+            Input bind {input ->
+            Signature bind  {sig ->
+                pure(SignedInput(input, sig))
+            } }
 }
+
+data class SpendingConditionInput(val input: Input, val msgData: ByteArray, val script: ByteArray): Serializable {
+    override fun toByteArray(): ByteArray =
+        input.toByteArray() + msgData.size.toUShort().toByteArray() + msgData +
+        script.size.toUShort().toByteArray() + script
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is SpendingConditionInput -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
+
+    companion object : Decoder<SpendingConditionInput> by
+            Input                           bind {input ->
+            GetUShort                       bind {msgDataLength ->
+            getSlice(msgDataLength.toInt()) bind {msgData ->
+            GetUShort                       bind {scriptLength ->
+            getSlice(scriptLength.toInt())  bind {script ->
+                pure(SpendingConditionInput(input, msgData, script))
+            } } } } }
+}
+
+data class UnsignedTransfer(val inputs: List<Input>, val outputs: List<Output>) : Serializable {
+    override fun toByteArray(): ByteArray =
+                3.toUByte().toByteArray() +
+                lengthsHash(inputs.size.toUByte(), outputs.size.toUByte()).toByteArray() +
+                inputs.map { SignedInput(it, Signature.EMPTY) }.toByteArray() +
+                outputs.toByteArray()
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is UnsignedTransfer -> other.toHexString() == this.toHexString()
+            else -> super.equals(other)
+        }
+    }
+
+    companion object : Decoder<UnsignedTransfer> by
+            GetUByte                     bind {
+            GetUByte.map(::parseLengths) bind { pair ->
+            // kotlinc-js bug??
+            val ins = pair.first
+            val outs = pair.second
+            mul(SignedInput, ins)        bind { signedInputs ->
+            mul(Output, outs)            bind { outputs ->
+                val inputs = signedInputs.map { it.input }
+                pure(UnsignedTransfer(inputs, outputs))
+            } } } }
+}
+
 
 
 

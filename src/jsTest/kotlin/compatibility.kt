@@ -1,33 +1,83 @@
 package leapcore
 
 import kotlin.test.Test
-import kotlin.test.assertTrue
-
-external class Buffer {
-    fun toString(encoding: String): String
-}
-
-@JsModule("leap-core")
-@JsNonModule
-external class LeapCore {
-    class Output(value: Int, address: String, color: Int) {
-        fun toRaw(): Buffer
-    }
-}
 
 
 class CompatibilityTests {
 
     @Test
-    fun outputIsSerializedIdentically() {
-        val value = 10
-        val address = "0xb1ccdb544f603af631525ec406245909ad6e1b60"
-        val color = 0
-
-        val originalOutput = LeapCore.Output(value, address, color)
-        val newOutput = Output(BigInt.fromString(value.toString()), byteArrayFomHexString(address), color.toUShort())
-
-        assertTrue { newOutput.toHexString() == "0x" + originalOutput.toRaw().toString("hex") }
+    fun output() {
+        testProperty(genOutput, outputRoundaboutIsIdentity)
+        testProperty(genOutput, outputSerializesIdentically)
+        testProperty(genRawOutput, outputDeserializesIdentically)
     }
+
+    @Test
+    fun outputWithData() {
+        testProperty(genOutputWithData, outputWithDataRoundaboutIsIdentity)
+        testProperty(genOutputWithData, outputWithDataSerializesIdentiaclly)
+        testProperty(genRawOutputWithData, outputWithDataDesrializesIdentically)
+    }
+
+    @Test
+    fun input() {
+        testProperty(genInput, inputRoundaboutIsIdentity)
+        testProperty(genInput, inputSerializesIdentically)
+        testProperty(genRawInput, inputDeserializesIdentically)
+        testProperty(genInput, utxoIdIsIdentiacal)
+    }
+
+    @Test
+    fun signedInput() {
+        testProperty(genSignedInput, signedInputRoundaboutIsIdentity)
+        testProperty(genSignedInput, signedInputSerializesIdentiaclly)
+        testProperty(genRawSignedInput, signedInputDeserializesIdentically)
+    }
+
+    @Test
+    fun unsignedTransfer() {
+        testProperty(genUnsignedTransfer, unsignedTransferRoundaboutIsIdentity)
+        testProperty(genUnsignedTransfer, unsignedTransferSerializesIdentiaclly)
+    }
+
+    @Test
+    fun spendingConditionInput() {
+        testProperty(genSpendingConditionInput, spendingConditionInputRoundaboutIsIdentity)
+        testProperty(genSpendingConditionInput, spendingConditionInputSerializesIdentically)
+        testProperty(genRawSpendingConditionInput, spendingConditionInputDeserialzesIdentically)
+    }
+
+    @Test
+    fun transferRoundabout() {
+        testProperty(genTransfer, transferRoundaboutIsIdentity)
+    }
+    @Test
+    fun transferSerialization() {
+        testProperty(genTransfer, transferSerializesIdentically)
+    }
+    @Test
+    fun transferDeserialization() {
+        testPropertyShort(genRawTransfer, transferDeserializesIdentiacally)
+    }
+
+    @Test
+    fun spendingConditionRoundabout() {
+        testProperty(genSpendingCondition, spendingConditionRoundaboutIsIdentity)
+    }
+    @Test
+    fun spendingConditionSerialization() {
+        testProperty(genSpendingCondition, spendingConditionSerializesIdentically)
+    }
+    @Test
+    fun spendingConditionDeserialization() {
+        testPropertyShort(genRawSpendingCondition, spendingConditionDeserializesIdentically)
+    }
+
+    @Test
+    fun deposit() {
+        testProperty(genDeposit, depositRoundaboutIsIdentity)
+        testProperty(genDeposit, depositSerializesIdentically)
+    }
+
 
 }
